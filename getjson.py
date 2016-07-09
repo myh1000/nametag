@@ -11,12 +11,12 @@ params = urllib.urlencode({
     # Request parameters
     'returnFaceId': 'true',
     'returnFaceLandmarks': 'false',
-    'returnFaceAttributes': '{string}',
+    'returnFaceAttributes': '{string}'
 })
 
 try:
     conn = httplib.HTTPSConnection('api.projectoxford.ai')
-    conn.request("POST", "/face/v1.0/detect?%s" % params, "{IMG_5799.jpg}", headers)
+    conn.request("POST", "/face/v1.0/detect?%s" % params, '{body}', headers)
     response = conn.getresponse()
     data = response.read()
     print(data)
