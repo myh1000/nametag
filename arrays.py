@@ -1,7 +1,8 @@
 import csv
 import json
 # 0 michael 1 lilia 2 kevin
-with open('test.json') as data_file:
+# 801 813
+with open('train.json') as data_file:
     data = json.load(data_file)
 print len(data)
 with open('training.csv', 'a') as csvfile:
@@ -12,6 +13,11 @@ with open('training.csv', 'a') as csvfile:
         attributes = data[idx]['faceAttributes']
         face = attributes['facialHair']
         glasses = attributes['glasses']
+        gender = attributes['gender']
+        if gender == "male":
+            gender = 0
+        else:
+            gender = 1
         if glasses == "":
             glasses = 0
         else:
