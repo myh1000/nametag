@@ -1,16 +1,16 @@
 import csv
-import json
+import json, ast
 # 0 michael 1 lilia 2 kevin
 # 801 813
 with open('train.json') as data_file:
     data = json.load(data_file)
-print len(data)
-with open('training.csv', 'a') as csvfile:
+
+with open('training.csv', 'w') as csvfile:
     trainCSV = csv.writer(csvfile, delimiter=',')
     trainCSV.writerow([len(data)])
+    print len(data)
     for i in range (0,len(data)):
-        idx = str(i)
-        attributes = data[idx]['faceAttributes']
+        attributes = data[i]['faceAttributes']
         face = attributes['facialHair']
         glasses = attributes['glasses']
         gender = attributes['gender']
@@ -18,9 +18,14 @@ with open('training.csv', 'a') as csvfile:
             gender = 0
         else:
             gender = 1
-        if glasses == "":
+        if glasses == "NoGlasses":
             glasses = 0
         else:
             glasses = 1
         trainCSV = csv.writer(csvfile, delimiter=',')
-        trainCSV.writerow([face['moustache'], face['beard'], face['sideburns'], glasses, 0])
+        if (i <= 10):
+            trainCSV.writerow([face['moustache'], face['beard'], face['sideburns'], glasses, gender, 0])
+        elif (i <= 22):
+            trainCSV.writerow([face['moustache'], face['beard'], face['sideburns'], glasses, gender, 1])
+        else:
+            trainCSV.writerow([face['moustache'], face['beard'], face['sideburns'], glasses, gender, 2])
