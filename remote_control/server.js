@@ -1,18 +1,11 @@
 var express = require('express')
-var firebase = require("firebase");
+var firebase = require('firebase');
 var bodyParser = require('body-parser')
 var request = require('request')
 var os = require('os')
 var app = express()
 
-var ref = new Firebase("https://postmatesthing.firebaseio.com/")
-
-// As an admin, the app has access to read and write all data, regardless of Security Rules
-var db = firebase.database()
-var ref = db.ref("restricted_access/secret_document") // TODO change to actual db
-ref.once("value", function(snapshot) {
-  console.log(snapshot.val())
-})
+var ref = new firebase("https://postmatesthing.firebaseio.com/")
 
 app.set('port', (process.env.PORT || 5000))
 
