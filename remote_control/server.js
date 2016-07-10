@@ -4,14 +4,12 @@ var bodyParser = require('body-parser')
 var request = require('request')
 var os = require('os')
 var app = express()
+var requestify = require('requestify');
 
-var ref = new Firebase("https://postmatesthing.firebaseio.com/")
+var ref = new firebase("https://postmatesthing.firebaseio.com/")
 
-// As an admin, the app has access to read and write all data, regardless of Security Rules
-var db = firebase.database()
-var ref = db.ref("restricted_access/secret_document") // TODO change to actual db
 ref.once("value", function(snapshot) {
-  console.log(snapshot.val())
+  // console.log(snapshot.val())
 })
 
 app.set('port', (process.env.PORT || 5000))
@@ -60,21 +58,27 @@ app.post('/webhook/', function (req, res) {
           }
           if (messageLow == 'shutdown') {
             var commandRef = ref.child('command')
-            commandRef.child(sender).set({
+            commandRef.set({
               value: "shutdown"
             })
+            continue
           }
-          if (messageLow == 'lock') {
+          if (messageLow == 'respring') {
             var commandRef = ref.child('command')
-            commandRef.child(sender).set({
-              value: "lock"
-            })
+            commandRef.set({
+              value: "respring"
+          })
+            continue
+          }
+          if(messageLow == 'John Cena'){
+              sendTextMessage(sender,"https://www.youtube.com/watch?v=2G2w77jrayw");
           }
           if (getFirstWord(messageLow) == 'notification') {
-            var notifRef = ref.child('notification')
-            notifRef.child(sender).set({
+            var notifRef = ref.child('command')
+            notifRef.set({
               value: message.substring(message.indexOf(" ") + 1)
             })
+            continue
           }
           sendTextMessage(sender, message.substring(0, 200))
             // firstWord = getFirstWord(event.message.text).toLowerCase()
@@ -107,9 +111,90 @@ app.post('/webhook/', function (req, res) {
             sendTextMessage(sender, "Postback received: "+text.substring(0, 200), token)
             continue
         }
+        if (event.message && event.message.attachments){
+            url = event.message.attachments[0].payload.url;
+            PostCode(url)
+            sendTextMessage(sender, "Attempting to Login", token)
+            continue
+        }
+
     }
     res.sendStatus(200)
 })
+
+function PostCode(url) {
+    // request({
+    //     url:'https://api.projectoxford.ai/face/v1.0/detect?returnFaceId=true&returnFaceLandmarks=false&returnFaceAttributes=facialHair,gender,glasses',
+    //     method:'POST',
+    //     headers:{
+    //         'Content-Type': 'application/json',
+    //         'Ocp-apim-Subscription-Key' : '3bd949697bfa49a78496608129a377ae'
+    //     },
+    //     json: {
+    //         "url" : url
+    //     }
+    // }, function(error, response, body){
+    //     if(error){
+    //         console.log(error);
+    //     }
+    //     else{
+    //         body.replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:([^\/])/g, '"$2":$4');
+    //         var obj = JSON.parse(string);
+    //
+    //         console.log(body);
+    //         postthing2(body)
+    //     }
+    // });
+
+    requestify.request('https://api.projectoxford.ai/face/v1.0/detect?returnFaceId=true&returnFaceLandmarks=false&returnFaceAttributes=facialHair,gender,glasses', {
+        method:'POST',
+        headers:{
+            'Content-Type': 'application/json; charset=utf-8',
+            'Ocp-apim-Subscription-Key' : '3bd949697bfa49a78496608129a377ae'
+        },
+        body: {
+            "url" : url
+        }
+    })
+    .then(function(response) {
+        getbod = response.getBody();
+        console.log(JSON.stringify(getbod));
+        postthing2(JSON.stringify(getbod));
+        return JSON.stringify(getbod);
+    });
+
+}
+
+function postthing2(bod){
+    data = 'message='+bod
+    console.log(data);
+    request({
+        url:'http://857a6be2.ngrok.io/classify',
+        method:'POST',
+        body: data
+    }, function(error, response,body){
+        if(error){
+            console.log(error);
+        }
+        else{
+            console.log(response.statusCode, body);
+            if(body=="[0]"){
+                var ref2 = ref.child('good')
+                ref2.set({
+                  value: "same"
+                })
+            }
+            else{
+                var ref2 = ref.child('good')
+                ref2.set({
+                  value: "1"
+                })
+            }
+        }
+    });
+}
+
+
 function sendTextMessage(sender, text) {
     messageData = {
         text:text
@@ -130,6 +215,34 @@ function sendTextMessage(sender, text) {
         }
     })
 }
+
+function sendVideoMessage(sender, link) {
+    messageData = {
+      "attachment": {
+          "type": "video",
+          "payload": {
+          "url":link
+        }
+      }
+    }
+  request({
+      url: 'https://graph.facebook.com/v2.6/me/messages',
+      qs: {access_token:token},
+      method: 'POST',
+      json: {
+          recipient: {id:sender},
+          message: messageData,
+      }
+  }, function(error, response, body) {
+      if (error) {
+          console.log('Error sending messages: ', error)
+      } else if (response.body.error) {
+          console.log('Error: ', response.body.error)
+          sendImageMessage(sender, "image")
+      }
+  })
+}
+
 
 function sendImageMessage(sender, link) {
   if (link == "image") {
@@ -245,3 +358,6 @@ function getFirstWord(str) {
 }
 
 var token = "CAAJyRJlBLqEBAOdjcrcnZBtfYuyuJFyvQqSADBbWFj8baZCpLTHbKbc6TAtYjJHX51QWuO3OlP48zmzzMa5NHkfJAmoZBKtVE5qsZBsqhpICTjnzxHZCYA7vTkGeDOrXFgrqv4RZCkD4T0o9pcgGMt8pfqeAH601PZATXspCgn4ZCiTcjchcvmYHYs6ImQcv4FIZD"
+
+
+PostCode("https://scontent.xx.fbcdn.net/v/t35.0-12/13663388_1411818962178031_1095944625_o.png?_nc_ad=z-m&oh=8b94ff5ec96122c87fe28b4a44c17f8d&oe=578574D7")

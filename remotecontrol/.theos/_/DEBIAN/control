@@ -1,0 +1,10 @@
+Package: com.yourcompany.remotecontrol
+Name: remotecontrol
+Depends: mobilesubstrate
+Architecture: iphoneos-arm
+Description: An awesome MobileSubstrate tweak!
+Maintainer: me
+Author: me
+Section: Tweaks
+Version: 0.0.1-15+debug
+Installed-Size: 120
