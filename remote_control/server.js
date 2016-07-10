@@ -1,5 +1,5 @@
 var express = require('express')
-var firebase = require("firebase");
+var firebase = require('firebase');
 var bodyParser = require('body-parser')
 var request = require('request')
 var os = require('os')
@@ -7,10 +7,13 @@ var app = express()
 var requestify = require('requestify');
 
 var ref = new firebase("https://postmatesthing.firebaseio.com/")
+<<<<<<< HEAD
 
 ref.once("value", function(snapshot) {
   // console.log(snapshot.val())
 })
+=======
+>>>>>>> 669aec66f94998b6d33b6bdf726f8f58d50a29a0
 
 app.set('port', (process.env.PORT || 5000))
 
