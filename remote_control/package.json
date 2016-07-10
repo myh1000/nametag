@@ -1,0 +1,16 @@
+{
+  "name": "same",
+  "version": "1.0.5",
+  "description": "messenger bot",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "michael h",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.15.0",
+    "express": "^4.13.4",
+    "request": "^2.71.0"
+  }
+}
